@@ -5,7 +5,7 @@ description = "A local-first RAG engine that answers questions about any reposit
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-authors = [{ name = "RepoLens contributors" }]
+authors = [{ name = "Sumanth D" }]
 keywords = ["rag", "code-search", "tree-sitter", "embeddings", "documentation-drift"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -64,10 +64,10 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/repolens/repolens"
-Documentation = "https://github.com/repolens/repolens"
-Repository = "https://github.com/repolens/repolens"
-Changelog = "https://github.com/repolens/repolens/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/sumanthd032/RepoLens"
+Documentation = "https://github.com/sumanthd032/RepoLens"
+Repository = "https://github.com/sumanthd032/RepoLens"
+Changelog = "https://github.com/sumanthd032/RepoLens/blob/main/CHANGELOG.md"
 
 [project.scripts]
 repolens = "repolens.cli:app"

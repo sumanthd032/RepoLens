@@ -5,7 +5,8 @@ on:
     tags: ["v*"]
 
 permissions:
-  contents: write
+  contents: write # create the GitHub Release
+  id-token: write # mint the OIDC token for PyPI Trusted Publishing
 
 jobs:
   release:
@@ -36,10 +37,11 @@ jobs:
       - name: Build wheel and sdist
         run: uv build
 
+      # Trusted Publishing: uv mints an OIDC token from the id-token permission above, so no
+      # API token secret is needed. Requires a matching trusted publisher configured on PyPI
+      # (owner: sumanthd032, repo: RepoLens, workflow: release.yml).
       - name: Publish to PyPI
-        env:
-          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-        run: uv publish
+        run: uv publish --trusted-publishing always
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
