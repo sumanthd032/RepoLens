@@ -46,6 +46,40 @@ def test_tiny_chunk_is_dropped() -> None:
     assert out == []
 
 
+def test_single_line_over_max_tokens_terminates() -> None:
+    # Regression: a single line wider than max_tokens used to make the sliding window
+    # re-process the same start line forever, growing the window list until the process
+    # ran out of memory. Splitting must terminate and the giant line must still be emitted.
+    giant_line = "    data = [" + ", ".join(f"item_{i}" for i in range(400)) + "]"
+    body = "def big():\n" + giant_line + "\n    return data"
+    assert count_tokens(giant_line) > 128
+    chunker = SemanticChunker(max_tokens=128, overlap_tokens=24)
+
+    out = chunker.chunk(_parsed(body))
+
+    assert len(out) >= 1
+    assert any("item_399" in c.body for c in out)
+    # Sub-chunk indices are contiguous and consistent (no runaway duplication).
+    assert [c.part for c in out] == list(range(len(out)))
+
+
+def test_unbalanced_bracket_span_terminates() -> None:
+    # Regression: a bracketed literal longer than max_tokens with no depth-balanced line in
+    # the middle (common in Go map/struct/slice literals) left no safe boundary for the
+    # overlap back-off, so the window start snapped before itself and looped forever. Must
+    # terminate and cover the whole literal.
+    middle = "\n".join(f'    "key_{i}": compute(arg_{i}, other_{i})+offset_{i},' for i in range(200))
+    body = "data = map[string]int{\n" + middle + "\n}"
+    chunker = SemanticChunker(max_tokens=128, overlap_tokens=24)
+
+    out = chunker.chunk(_parsed(body))
+
+    assert len(out) > 1
+    assert any("key_0" in c.body for c in out)
+    assert any("key_199" in c.body for c in out)
+    assert [c.part for c in out] == list(range(len(out)))
+
+
 def test_large_function_is_sub_chunked() -> None:
     body = _large_function(120)
     assert count_tokens(body) > 512

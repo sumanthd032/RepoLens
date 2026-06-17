@@ -133,7 +133,13 @@ class SemanticChunker:
             windows.append((start, end))
             if end >= n:
                 break
-            start = self._overlap_start(end, line_tokens, safe)
+            # Guarantee forward progress. When a single line exceeds ``max_tokens`` the window
+            # spans just that line (``end == start + 1``) and the overlap back-off can land on
+            # ``start`` again, which would loop forever and grow ``windows`` without bound. If
+            # the overlap start does not advance past the current ``start``, drop the overlap
+            # for this boundary and continue from ``end``.
+            next_start = self._overlap_start(end, line_tokens, safe)
+            start = next_start if next_start > start else end
 
         return self._windows_to_chunks(parsed, lines, windows)
 
