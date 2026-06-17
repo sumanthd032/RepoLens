@@ -25,10 +25,11 @@ top_k_rerank = 8
 graph_expansion_hops = 1
 
 [generation]
-# LLM backend: anthropic | openai | ollama
-llm_backend = "anthropic"
+# LLM backend: groq | anthropic | openai | ollama
+# Default is Groq — a free, OpenAI-compatible hosted tier (set GROQ_API_KEY).
+llm_backend = "groq"
 # Model identifier passed to the selected backend.
-llm_model = "claude-sonnet-4-5"
+llm_model = "llama-3.3-70b-versatile"
 # Maximum tokens in a generated answer.
 max_answer_tokens = 2048
 # Times to regenerate when citation validation fails.

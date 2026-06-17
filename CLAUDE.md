@@ -281,9 +281,12 @@ event: error        data: {"message": "...", "type": "not_found"|"validation_fai
 ## Current Implementation Status
 
 ```
-COMPLETED_STEPS: [1]
-CURRENT_STEP: 1 (complete)
-NEXT_STEP: 2
+COMPLETED_STEPS: [1, 2]
+CURRENT_STEP: 2 (complete)
+NEXT_STEP: 3
 ```
+
+> Note: Default LLM backend changed to **Groq** (free, OpenAI-compatible) per project
+> constraint of using only free APIs. Local models (embeddings/reranker/NLI) unchanged.
 
 Update this section at the start and end of each step.
