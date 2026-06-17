@@ -87,3 +87,36 @@ def test_no_premises_scores_none() -> None:
     result = scorer.score("A grounded sentence.", [])
     assert result.score == 0.0
     assert result.verdict == "none"
+
+
+class LogitNLI:
+    """Mimics a real cross-encoder: emits raw logits (entailment=5.0) and only normalises
+    when ``apply_softmax=True`` is passed, exactly as ``CrossEncoder.predict`` does."""
+
+    def predict(self, sentences: list[list[str]], **kwargs: object) -> list[list[float]]:
+        logits = [[0.0, 5.0, 0.0] for _ in sentences]
+        if not kwargs.get("apply_softmax"):
+            return logits
+        out = []
+        for row in logits:
+            mx = max(row)
+            exps = [pow(2.718281828, v - mx) for v in row]
+            total = sum(exps)
+            out.append([e / total for e in exps])
+        return out
+
+
+def test_grounding_score_is_normalised_to_probabilities() -> None:
+    # Regression: the scorer must request softmax so raw logits (which can exceed 1) become
+    # probabilities. Without it, a grounding score like 1.12 leaks through.
+    scorer = GroundingScorer(model=LogitNLI())
+    result = scorer.score("A grounded sentence.", ["a premise"])
+    assert 0.0 <= result.score <= 1.0
+
+
+def test_classify_returns_probabilities() -> None:
+    # Regression: drift relies on classify() returning a real probability distribution.
+    scorer = GroundingScorer(model=LogitNLI())
+    probs = scorer.classify("a premise", "a hypothesis")
+    assert abs(sum(probs.values()) - 1.0) < 1e-5
+    assert all(0.0 <= v <= 1.0 for v in probs.values())

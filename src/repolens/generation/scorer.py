@@ -110,8 +110,11 @@ class GroundingScorer:
             return GroundingResult(score=0.0, verdict="none")
 
         # One (premise, hypothesis) pair per sentence × chunk, scored in a single batch.
+        # apply_softmax=True is required: the cross-encoder returns raw logits by default,
+        # which can fall outside [0, 1] and produce grounding scores above 1.0. Softmax over
+        # the three NLI labels turns them into genuine entailment probabilities.
         pairs = [[chunk, sentence] for sentence in sentences for chunk in cited_chunks]
-        probs = np.asarray(self.model.predict(pairs), dtype=np.float32)
+        probs = np.asarray(self.model.predict(pairs, apply_softmax=True), dtype=np.float32)
         entail = probs[:, self.entailment_index].reshape(len(sentences), len(cited_chunks))
         per_sentence = entail.max(axis=1)
 
@@ -130,7 +133,10 @@ class GroundingScorer:
         Used by drift detection, which needs the full three-way verdict (a claim can be
         *contradicted* by code, not merely unsupported) rather than a single grounding number.
         """
-        probs = np.asarray(self.model.predict([[premise, hypothesis]]), dtype=np.float32)[0]
+        # apply_softmax=True so the three labels are real probabilities (see score()).
+        probs = np.asarray(
+            self.model.predict([[premise, hypothesis]], apply_softmax=True), dtype=np.float32
+        )[0]
         return {
             "contradiction": float(probs[_CONTRADICTION_INDEX]),
             "entailment": float(probs[self.entailment_index]),
