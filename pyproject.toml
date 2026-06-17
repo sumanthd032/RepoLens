@@ -76,8 +76,17 @@ repolens = "repolens.cli:app"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+# The built SPA in src/repolens/static/ is gitignored, so hatchling would omit it from the
+# sdist (and thus the wheel, which uv builds from the sdist), leaving `repolens serve` with no
+# frontend to serve (invariant #7). force-include bakes it into both distributions.
+[tool.hatch.build.targets.sdist.force-include]
+"src/repolens/static" = "src/repolens/static"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/repolens"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/repolens/static" = "repolens/static"
 
 [tool.uv]
 package = true
