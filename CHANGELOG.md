@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1]
+
+### Fixed
+- LLM backend failures (missing API key, provider rate-limits such as Groq 429) now surface as
+  a structured `error` event on the ask stream (`rate_limited` / `llm_unconfigured` /
+  `llm_error`) and a `502` with a clear message on the drift endpoint, instead of an unhandled
+  500 with a stack trace.
+
 ## [0.1.0]
 
 ### Added

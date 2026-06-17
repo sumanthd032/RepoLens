@@ -2,7 +2,7 @@
 # Distribution (install) name on PyPI. The import package and CLI command remain `repolens`;
 # the plain `repolens` name was rejected by PyPI's similarity guard.
 name = "repolens-rag"
-version = "0.1.0"
+version = "0.1.1"
 description = "A local-first RAG engine that answers questions about any repository, grounded exclusively in the checked-out code with verifiable file:line citations."
 readme = "README.md"
 requires-python = ">=3.11"
