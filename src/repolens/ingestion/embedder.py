@@ -26,7 +26,18 @@ logger = get_logger("ingestion.embedder")
 
 DEFAULT_MODEL = "jinaai/jina-embeddings-v2-base-code"
 DEFAULT_DIMENSION = 768
-_BATCH_SIZE = 32
+# ALiBi attention allocates a (batch x heads x seq x seq) tensor, so peak memory scales with
+# batch_size * max_seq_length**2. With a 1024-token cap, batch_size=8 keeps the forward pass
+# well under a few GB on CPU; 32 could exceed 4 GB and trigger the OOM killer.
+_BATCH_SIZE = 8
+
+# jina-v2-base-code defaults to max_seq_length=8192 and uses ALiBi dense attention, whose
+# memory cost is quadratic in sequence length. A chunk that is small by the chunker's regex
+# token count but large in BPE subwords (e.g. one unbroken string/data blob) would otherwise
+# allocate tens of GB on CPU. Capping the sequence length truncates such inputs and keeps
+# embedding memory bounded. The cap sits above the 512-token chunk budget to leave headroom
+# for BPE expansion of normal code.
+_MAX_SEQ_LENGTH = 1024
 
 
 class _EncoderModel(Protocol):
@@ -67,11 +78,16 @@ class CodeEmbedder:
             from sentence_transformers import SentenceTransformer
 
             logger.info("Loading embedding model %s", self.model_name)
-            self._model = SentenceTransformer(
+            model = SentenceTransformer(
                 self.model_name,
                 device=self.device,
                 trust_remote_code=True,
             )
+            # Bound the attention window so a pathologically long chunk cannot exhaust RAM.
+            current = getattr(model, "max_seq_length", None)
+            if current is None or current > _MAX_SEQ_LENGTH:
+                model.max_seq_length = _MAX_SEQ_LENGTH
+            self._model = model
         return self._model
 
     @staticmethod
