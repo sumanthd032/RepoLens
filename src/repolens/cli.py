@@ -18,7 +18,9 @@ from repolens.api.engine import answer_events, build_state, run_drift
 from repolens.utils.logger import get_logger
 
 logger = get_logger("cli")
-app = typer.Typer(help="RepoLens — grounded code Q&A and doc-drift detection.", no_args_is_help=True)
+app = typer.Typer(
+    help="RepoLens — grounded code Q&A and doc-drift detection.", no_args_is_help=True
+)
 console = Console()
 
 

@@ -1,5 +1,5 @@
-# RepoLens docker-compose — skeleton (completed in Step 10).
-# Single service, single port. Mounts ~/.repolens for index persistence across restarts.
+# RepoLens — single service, single port. Mounts a named volume for index persistence
+# (vectors, BM25, symbol graph, metadata, and the local model cache) across restarts.
 
 services:
   repolens:
@@ -10,11 +10,15 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      # Persist all indexes (vectors, BM25, symbol graph, metadata) on the host.
-      - ${HOME}/.repolens:/root/.repolens
+      - repolens-data:/data
     environment:
-      - REPOLENS_DATA_DIR=/root/.repolens
+      - REPOLENS_DATA_DIR=/data
       - REPOLENS_LOG_LEVEL=INFO
-      # Provide your key via an .env file or the host environment.
+      # Default backend is Groq (free). Provide a key via .env or the host environment.
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
     restart: unless-stopped
+
+volumes:
+  repolens-data:

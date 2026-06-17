@@ -37,7 +37,9 @@ Verdict = str  # "high" | "medium" | "low" | "none"
 class _NLIModel(Protocol):
     """Minimal interface the scorer needs from an NLI cross-encoder."""
 
-    def predict(self, sentences: list[list[str]], **kwargs: object) -> Sequence[Sequence[float]]: ...
+    def predict(
+        self, sentences: list[list[str]], **kwargs: object
+    ) -> Sequence[Sequence[float]]: ...
 
 
 @dataclass
@@ -114,7 +116,8 @@ class GroundingScorer:
         per_sentence = entail.max(axis=1)
 
         sentence_scores = [
-            (sentence, float(value)) for sentence, value in zip(sentences, per_sentence, strict=True)
+            (sentence, float(value))
+            for sentence, value in zip(sentences, per_sentence, strict=True)
         ]
         mean = float(per_sentence.mean())
         return GroundingResult(

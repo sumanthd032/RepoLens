@@ -25,9 +25,7 @@ class BaseLLMClient(ABC):
         self.model = model
 
     @abstractmethod
-    def stream(
-        self, messages: list[Message], system: str | None = None
-    ) -> AsyncIterator[str]:
+    def stream(self, messages: list[Message], system: str | None = None) -> AsyncIterator[str]:
         """Yield response text tokens for ``messages`` (optionally with a ``system`` prompt)."""
         raise NotImplementedError
 

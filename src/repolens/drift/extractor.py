@@ -30,7 +30,7 @@ _SYSTEM = (
     "You extract factual, verifiable claims about software behaviour from documentation. A claim "
     "is a single statement that could be checked against source code (defaults, return values, "
     "error handling, supported options, limits). Ignore marketing, install steps, and examples. "
-    "Respond ONLY with a JSON array of objects {\"claim\": str, \"line\": int}, where line is the "
+    'Respond ONLY with a JSON array of objects {"claim": str, "line": int}, where line is the '
     "1-based line number in the document where the claim appears. Return [] if there are none."
 )
 _USER = "Document: {name}\n\n{numbered}\n\nExtract the verifiable claims as a JSON array:"

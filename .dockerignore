@@ -1,0 +1,29 @@
+# Keep the build context small and reproducible.
+.git
+.github
+**/__pycache__
+**/*.pyc
+.venv
+venv
+.mypy_cache
+.ruff_cache
+.pytest_cache
+dist
+build
+*.egg-info
+
+# Frontend build artefacts (rebuilt inside the image)
+frontend/node_modules
+frontend/dist
+src/repolens/static
+
+# Local config / data
+.env
+.repolens.toml
+~/.repolens
+*.log
+
+# Editor / OS cruft
+.idea
+.vscode
+.DS_Store

@@ -40,6 +40,7 @@ def make_chunk_id(file_path: str, symbol_name: str, part: int, body: str) -> str
     key = f"{file_path}|{symbol_name}|{part}|{body_hash}"
     return str(uuid.uuid5(_CHUNK_NAMESPACE, key))
 
+
 # Splits code into word, number, and single-punctuation tokens — a stable proxy for the
 # subword count without loading a model tokenizer.
 _TOKEN_RE = re.compile(r"[A-Za-z_]\w*|\d+|[^\s\w]")

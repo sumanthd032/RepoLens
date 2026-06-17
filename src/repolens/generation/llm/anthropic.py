@@ -20,9 +20,7 @@ DEFAULT_MAX_TOKENS = 2048
 class AnthropicClient(BaseLLMClient):
     """Streaming client for the Anthropic Messages API."""
 
-    def __init__(
-        self, api_key: str, model: str, max_tokens: int = DEFAULT_MAX_TOKENS
-    ) -> None:
+    def __init__(self, api_key: str, model: str, max_tokens: int = DEFAULT_MAX_TOKENS) -> None:
         super().__init__(model)
         self.max_tokens = max_tokens
         self._client = anthropic.AsyncAnthropic(api_key=api_key)

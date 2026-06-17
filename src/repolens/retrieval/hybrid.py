@@ -112,9 +112,7 @@ class HybridRetriever:
         top_ids = [chunk_id for chunk_id, _ in fused[:top_k]]
         return self._materialise(top_ids, dense_chunks)
 
-    def _materialise(
-        self, chunk_ids: list[str], known: list[IndexChunk]
-    ) -> list[IndexChunk]:
+    def _materialise(self, chunk_ids: list[str], known: list[IndexChunk]) -> list[IndexChunk]:
         """Resolve ``chunk_ids`` to chunks, reusing ``known`` and fetching the rest by id."""
         by_id = {chunk.chunk_id: chunk for chunk in known}
         missing = [cid for cid in chunk_ids if cid not in by_id]

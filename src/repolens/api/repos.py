@@ -85,9 +85,7 @@ async def _run_index(state: AppState, repo_id: str, source: str, name: str) -> N
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-async def add_repo(
-    req: AddRepoRequest, state: AppState = Depends(get_state)
-) -> dict[str, Any]:
+async def add_repo(req: AddRepoRequest, state: AppState = Depends(get_state)) -> dict[str, Any]:
     """Register a repo and kick off background indexing."""
     repo_id = str(uuid.uuid4())
     source, name = await _resolve_source(state, req, repo_id)

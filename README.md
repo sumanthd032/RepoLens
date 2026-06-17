@@ -4,11 +4,10 @@
 
 **Ask any repository how it actually works — and get answers grounded in the real code.**
 
-<!-- Badges (wired up in Step 10) -->
-<!-- ![CI](https://img.shields.io/github/actions/workflow/status/sumanthd032/repolens/ci.yml) -->
-<!-- ![PyPI](https://img.shields.io/pypi/v/repolens) -->
-<!-- ![Python](https://img.shields.io/badge/python-3.11%2B-blue) -->
-<!-- ![License](https://img.shields.io/badge/license-MIT-green) -->
+[![CI](https://img.shields.io/github/actions/workflow/status/sumanthd032/repolens/ci.yml?branch=main&label=CI)](https://github.com/sumanthd032/repolens/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/repolens)](https://pypi.org/project/repolens/)
+![Python](https://img.shields.io/badge/python-3.11%2B-blue)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 </div>
 
@@ -32,11 +31,15 @@ from the code.
 
 ## Quick install
 
-> RepoLens is under active development. Installation will be available from PyPI once the
-> first release ships (see [docs/STEPS.md](docs/STEPS.md)).
-
 ```bash
 pip install repolens
+export GROQ_API_KEY=gsk_...         # free key: https://console.groq.com/keys
+```
+
+Or run it fully containerised:
+
+```bash
+GROQ_API_KEY=gsk_... docker compose up   # then open http://localhost:8000
 ```
 
 ## Quickstart
@@ -47,6 +50,8 @@ repolens ask "how does routing work?" --repo <id>
 repolens drift --repo <id>         # find stale documentation
 repolens serve                     # launch the web UI at http://localhost:8000
 ```
+
+See the [Quickstart guide](docs/quickstart.md) for the full walkthrough.
 
 ## Architecture
 
@@ -64,6 +69,9 @@ Full details in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Documentation
 
+- [Quickstart](docs/quickstart.md)
+- [Configuration](docs/configuration.md)
+- [API reference](docs/api-reference.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Tech stack](docs/TECHSTACK.md)
 - [Implementation steps](docs/STEPS.md)

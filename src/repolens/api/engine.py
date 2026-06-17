@@ -158,9 +158,7 @@ async def answer_events(
         chunks = await asyncio.to_thread(
             state.reranker.rerank, query, chunks, retrieval.top_k_rerank
         )
-        chunks = state.build_expander(repo.id).expand(
-            chunks, hops=retrieval.graph_expansion_hops
-        )
+        chunks = state.build_expander(repo.id).expand(chunks, hops=retrieval.graph_expansion_hops)
     if not chunks:
         yield sse(
             "error",
@@ -178,9 +176,7 @@ async def answer_events(
     for _attempt in range(state.config.generation.max_retries + 1):
         answer = await llm.complete([{"role": "user", "content": user}], system)
         if answer.strip().startswith(NOT_FOUND_MARKER):
-            yield sse(
-                "error", {"message": "Not found in this codebase.", "type": "not_found"}
-            )
+            yield sse("error", {"message": "Not found in this codebase.", "type": "not_found"})
             return
         result = validator.validate(answer, parse_citations(answer))
         if result.ok:
@@ -225,9 +221,7 @@ async def run_drift(state: AppState, repo: RepoRecord) -> DriftReporter:
     return reporter
 
 
-async def drift_events(
-    state: AppState, repo: RepoRecord
-) -> AsyncIterator[dict[str, str]]:
+async def drift_events(state: AppState, repo: RepoRecord) -> AsyncIterator[dict[str, str]]:
     """Yield SSE progress events while detecting drift, ending with the full report."""
     llm = state.llm_factory()
     yield sse("progress", {"stage": "extract", "message": "Extracting documentation claims"})

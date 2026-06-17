@@ -67,7 +67,5 @@ class GroqClient(OpenAIClient):
 
     BASE_URL = "https://api.groq.com/openai/v1"
 
-    def __init__(
-        self, api_key: str, model: str, max_tokens: int = DEFAULT_MAX_TOKENS
-    ) -> None:
+    def __init__(self, api_key: str, model: str, max_tokens: int = DEFAULT_MAX_TOKENS) -> None:
         super().__init__(api_key, model, base_url=self.BASE_URL, max_tokens=max_tokens)

@@ -131,17 +131,24 @@ class MetadataStore:
                     updated_at=excluded.updated_at
                 """,
                 (
-                    repo_id, name, source, status, head_sha, num_files, num_chunks,
-                    langs, error, now, now,
+                    repo_id,
+                    name,
+                    source,
+                    status,
+                    head_sha,
+                    num_files,
+                    num_chunks,
+                    langs,
+                    error,
+                    now,
+                    now,
                 ),
             )
         record = self.get_repo(repo_id)
         assert record is not None
         return record
 
-    def update_status(
-        self, repo_id: str, status: RepoStatus, error: str | None = None
-    ) -> None:
+    def update_status(self, repo_id: str, status: RepoStatus, error: str | None = None) -> None:
         with self._connect() as conn:
             conn.execute(
                 "UPDATE repos SET status=?, error=?, updated_at=? WHERE id=?",

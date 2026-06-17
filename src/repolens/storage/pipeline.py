@@ -113,9 +113,7 @@ class IndexingPipeline:
             self.metadata.update_status(repo_id, "error", error=str(exc))
             raise
 
-    def _run(
-        self, root: Path, repo_id: str, name: str, progress: ProgressCallback
-    ) -> IndexResult:
+    def _run(self, root: Path, repo_id: str, name: str, progress: ProgressCallback) -> IndexResult:
         languages = set(self.config.index.languages)
         walker = GitWalker(root, languages=languages)
 
@@ -169,7 +167,10 @@ class IndexingPipeline:
         progress(IndexProgress(stage="done", message="Indexing complete", total=len(all_chunks)))
         logger.info(
             "Indexed %s: %d files, %d chunks, %d graph edges",
-            name, len(file_stats), len(all_chunks), graph.number_of_edges(),
+            name,
+            len(file_stats),
+            len(all_chunks),
+            graph.number_of_edges(),
         )
         return IndexResult(
             repo_id, name, len(file_stats), len(all_chunks), languages_sorted, head_sha

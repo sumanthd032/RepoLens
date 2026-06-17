@@ -73,9 +73,7 @@ class CrossEncoderReranker:
             self._model = CrossEncoder(self.model_name, device=self.device)
         return self._model
 
-    def rerank(
-        self, query: str, chunks: list[IndexChunk], top_k: int = 8
-    ) -> list[IndexChunk]:
+    def rerank(self, query: str, chunks: list[IndexChunk], top_k: int = 8) -> list[IndexChunk]:
         """Return the ``top_k`` chunks most relevant to ``query``, best first."""
         if not chunks:
             return []

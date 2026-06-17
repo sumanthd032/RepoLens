@@ -187,8 +187,7 @@ def _smallest_enclosing(chunk: IndexChunk, containers: list[IndexChunk]) -> Inde
         if (
             container.start_line <= chunk.start_line
             and container.end_line >= chunk.end_line
-            and (container.end_line - container.start_line)
-            > (chunk.end_line - chunk.start_line)
+            and (container.end_line - container.start_line) > (chunk.end_line - chunk.start_line)
         ):
             if best is None or (best.end_line - best.start_line) > (
                 container.end_line - container.start_line
