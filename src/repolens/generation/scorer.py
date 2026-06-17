@@ -27,7 +27,9 @@ logger = get_logger("generation.scorer")
 
 DEFAULT_MODEL = "cross-encoder/nli-deberta-v3-small"
 # Label order produced by the nli-deberta cross-encoders: contradiction, entailment, neutral.
+_CONTRADICTION_INDEX = 0
 _ENTAILMENT_INDEX = 1
+_NEUTRAL_INDEX = 2
 
 Verdict = str  # "high" | "medium" | "low" | "none"
 
@@ -118,3 +120,16 @@ class GroundingScorer:
         return GroundingResult(
             score=mean, verdict=_verdict_for(mean), sentence_scores=sentence_scores
         )
+
+    def classify(self, premise: str, hypothesis: str) -> dict[str, float]:
+        """Return ``{contradiction, entailment, neutral}`` probabilities for one NLI pair.
+
+        Used by drift detection, which needs the full three-way verdict (a claim can be
+        *contradicted* by code, not merely unsupported) rather than a single grounding number.
+        """
+        probs = np.asarray(self.model.predict([[premise, hypothesis]]), dtype=np.float32)[0]
+        return {
+            "contradiction": float(probs[_CONTRADICTION_INDEX]),
+            "entailment": float(probs[self.entailment_index]),
+            "neutral": float(probs[_NEUTRAL_INDEX]),
+        }

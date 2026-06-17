@@ -10,7 +10,7 @@ RepoLens is a monorepo with a Python backend (`src/repolens/`) and a React front
 
 ```bash
 # 1. Clone and enter the repo
-git clone https://github.com/repolens/repolens.git
+git clone https://github.com/sumanthd032/repolens.git
 cd repolens
 
 # 2. Install Python dependencies (creates a .venv automatically)

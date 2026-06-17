@@ -1,11 +1,11 @@
 <div align="center">
 
-# 🔭 RepoLens
+# RepoLens
 
 **Ask any repository how it actually works — and get answers grounded in the real code.**
 
 <!-- Badges (wired up in Step 10) -->
-<!-- ![CI](https://img.shields.io/github/actions/workflow/status/repolens/repolens/ci.yml) -->
+<!-- ![CI](https://img.shields.io/github/actions/workflow/status/sumanthd032/repolens/ci.yml) -->
 <!-- ![PyPI](https://img.shields.io/pypi/v/repolens) -->
 <!-- ![Python](https://img.shields.io/badge/python-3.11%2B-blue) -->
 <!-- ![License](https://img.shields.io/badge/license-MIT-green) -->
@@ -32,7 +32,7 @@ from the code.
 
 ## Quick install
 
-> ⚠️ RepoLens is under active development. Installation will be available from PyPI once the
+> RepoLens is under active development. Installation will be available from PyPI once the
 > first release ships (see [docs/STEPS.md](docs/STEPS.md)).
 
 ```bash
