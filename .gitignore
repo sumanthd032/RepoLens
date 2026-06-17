@@ -66,4 +66,7 @@ desktop.ini
 *.swo
 *~
 
+.claude
 CLAUDE.md
+/home/sumanthd032/Projects/RepoLens/docs/STEPS.md
+docs/UI_SPEC.md
