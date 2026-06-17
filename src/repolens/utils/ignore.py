@@ -16,18 +16,48 @@ from pathlib import Path
 
 import pathspec
 
-# Patterns always excluded, even without a .repolensignore file. These mirror the
-# shipped .repolensignore defaults and protect against indexing junk in bare repos.
+# Patterns always excluded, even without a .repolensignore file. These mirror the shipped
+# .repolensignore defaults and protect against indexing junk in bare repos. Keep in sync with
+# the repo-root .repolensignore. The virtualenv/site-packages entries are essential: indexing
+# a Python project with a local venv would otherwise sweep in tens of thousands of dependency
+# files (per invariant #6, this must be pruned at the walker, before any file is parsed).
 DEFAULT_PATTERNS: tuple[str, ...] = (
+    # Version control & IDE
     ".git/",
+    ".idea/",
+    ".vscode/",
+    # Dependencies / vendored code / virtualenvs
     "node_modules/",
     "vendor/",
+    "third_party/",
+    ".venv/",
+    "venv/",
+    "env/",
+    "ENV/",
+    "site-packages/",
+    # Build & distribution output
     "dist/",
     "build/",
-    "*.generated.*",
-    "*.pb.go",
+    "target/",
+    "out/",
+    "*.egg-info/",
+    # Caches
     "__pycache__/",
+    ".mypy_cache/",
+    ".ruff_cache/",
+    ".pytest_cache/",
+    # Generated code
+    "*.generated.*",
+    "*.gen.go",
+    "*.pb.go",
+    "*.pb.cc",
+    "*.pb.h",
+    "*_pb2.py",
+    "*_pb2_grpc.py",
+    # Minified / bundled assets
     "*.min.js",
+    "*.min.css",
+    "*.map",
 )
 
 

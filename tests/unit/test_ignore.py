@@ -19,6 +19,13 @@ from repolens.utils.ignore import DEFAULT_PATTERNS, IgnoreFilter
         "src/api.pb.go",
         ".git/config",
         "src/__pycache__/main.cpython-311.pyc",
+        # Regression: Python virtualenvs must be excluded by default, otherwise indexing a
+        # repo with a local venv sweeps in tens of thousands of dependency files.
+        "venv/lib/python3.14/site-packages/isympy.py",
+        ".venv/lib/python3.12/site-packages/numpy/core/_methods.py",
+        "env/lib/python3.11/site-packages/pkg/mod.py",
+        "some/nested/site-packages/dep.py",
+        "target/debug/build.rs",
     ],
 )
 def test_default_patterns_exclude_junk(path: str) -> None:
