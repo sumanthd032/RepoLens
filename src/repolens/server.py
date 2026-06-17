@@ -11,8 +11,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from repolens import __version__
@@ -43,12 +44,31 @@ def create_app(config: Config | None = None, state: AppState | None = None) -> F
     app.include_router(ask.router)
     app.include_router(drift.router)
 
-    if STATIC_DIR.is_dir():
-        app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
-    else:
+    _mount_frontend(app)
+    return app
+
+
+def _mount_frontend(app: FastAPI) -> None:
+    """Serve the built SPA: hashed assets plus an index.html fallback for client-side routes."""
+    if not STATIC_DIR.is_dir():
 
         @app.get("/")
         async def root() -> dict[str, Any]:
             return {"name": "RepoLens", "version": __version__, "ui": "not built"}
 
-    return app
+        return
+
+    assets = STATIC_DIR / "assets"
+    if assets.is_dir():
+        app.mount("/assets", StaticFiles(directory=assets), name="assets")
+    index_file = STATIC_DIR / "index.html"
+
+    @app.get("/{full_path:path}")
+    async def spa(full_path: str) -> FileResponse:
+        # API routes are registered first and win; everything else is the single-page app.
+        if full_path.startswith("api/"):
+            raise HTTPException(status.HTTP_404_NOT_FOUND)
+        candidate = STATIC_DIR / full_path
+        if full_path and candidate.is_file():
+            return FileResponse(candidate)
+        return FileResponse(index_file)
