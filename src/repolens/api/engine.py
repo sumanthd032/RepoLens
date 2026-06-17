@@ -141,6 +141,23 @@ def _cited_premises(citations: list[Any], chunks: list[IndexChunk]) -> list[str]
     return premises or [c.body for c in chunks]
 
 
+def friendly_llm_error(exc: Exception) -> tuple[str, str]:
+    """Map an LLM/backend exception to a user-facing ``(message, type)``.
+
+    Keeps provider failures (missing key, rate limits, outages) from surfacing as a raw 500
+    with a stack trace. The verdict ``type`` lets the UI distinguish causes.
+    """
+    text = str(exc).lower()
+    if isinstance(exc, ValueError) and "not set" in text:
+        return ("The LLM API key is not configured on the server.", "llm_unconfigured")
+    if getattr(exc, "status_code", None) == 429 or "rate limit" in text or "rate_limit" in text:
+        return (
+            "The language model is rate-limited right now. Please wait and try again.",
+            "rate_limited",
+        )
+    return ("The language model is currently unavailable. Please try again.", "llm_error")
+
+
 async def answer_events(
     state: AppState, repo: RepoRecord, query: str
 ) -> AsyncIterator[dict[str, str]]:
@@ -149,7 +166,13 @@ async def answer_events(
     Generation is buffered and validated *before* any token is emitted, so an answer with a bad
     citation is regenerated (up to ``max_retries``) rather than shown — enforcing Invariant 2.
     """
-    llm = state.llm_factory()
+    try:
+        llm = state.llm_factory()
+    except Exception as exc:
+        message, etype = friendly_llm_error(exc)
+        logger.warning("LLM unavailable for ask: %s", exc)
+        yield sse("error", {"message": message, "type": etype})
+        return
     retrieval = state.config.retrieval
     retriever = state.build_retriever(repo.id, llm_client=llm)
 
@@ -174,7 +197,13 @@ async def answer_events(
     validated = False
     reason = "validation failed"
     for _attempt in range(state.config.generation.max_retries + 1):
-        answer = await llm.complete([{"role": "user", "content": user}], system)
+        try:
+            answer = await llm.complete([{"role": "user", "content": user}], system)
+        except Exception as exc:
+            message, etype = friendly_llm_error(exc)
+            logger.warning("LLM generation failed: %s", exc)
+            yield sse("error", {"message": message, "type": etype})
+            return
         if answer.strip().startswith(NOT_FOUND_MARKER):
             yield sse("error", {"message": "Not found in this codebase.", "type": "not_found"})
             return

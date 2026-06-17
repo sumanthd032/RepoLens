@@ -38,7 +38,12 @@ export interface Grounding {
   verdict: GroundingVerdict;
 }
 
-export type AskErrorType = "not_found" | "validation_failed";
+export type AskErrorType =
+  | "not_found"
+  | "validation_failed"
+  | "llm_error"
+  | "rate_limited"
+  | "llm_unconfigured";
 
 export type AskEvent =
   | { event: "token"; data: { text: string } }

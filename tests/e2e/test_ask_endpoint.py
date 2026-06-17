@@ -6,6 +6,7 @@ from pathlib import Path
 
 import httpx
 
+from repolens.generation.llm.base import BaseLLMClient
 from repolens.server import create_app
 from tests.e2e.conftest import collect_sse, index_demo, make_state
 
@@ -82,6 +83,35 @@ async def test_ask_bad_citation_is_rejected(tmp_path: Path) -> None:
     assert "token" not in kinds
     error = next(d for e, d in events if e == "error")
     assert error["type"] == "validation_failed"
+
+
+async def test_ask_llm_rate_limited_emits_clean_error(tmp_path: Path) -> None:
+    # Regression: when the LLM backend errors (e.g. a 429 rate limit), the ask stream must
+    # emit a structured error event, not crash the request with a 500 + stack trace.
+    state = make_state(tmp_path, _GROUNDED)
+    repo_id = index_demo(state, tmp_path)
+
+    class _RateLimit(Exception):
+        status_code = 429
+
+    class RateLimitedLLM(BaseLLMClient):
+        def __init__(self) -> None:
+            super().__init__("fake")
+
+        async def stream(self, messages, system=None):  # type: ignore[no-untyped-def]
+            raise _RateLimit("rate limit reached")
+            yield ""  # unreachable; makes this an async generator
+
+    state.llm_factory = lambda: RateLimitedLLM()
+    async with client_for(create_app(state=state)) as client:
+        events = await collect_sse(
+            client, "POST", f"/api/repos/{repo_id}/ask", json={"query": "how does routing work"}
+        )
+
+    kinds = [e for e, _ in events]
+    assert "token" not in kinds
+    error = next(d for e, d in events if e == "error")
+    assert error["type"] == "rate_limited"
 
 
 async def test_ask_unknown_repo_404(tmp_path: Path) -> None:
