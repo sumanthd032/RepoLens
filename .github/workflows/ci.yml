@@ -22,9 +22,11 @@ jobs:
         with:
           enable-cache: true
       - run: uv sync --extra dev
-      - run: uv run ruff check src/
-      - run: uv run ruff format --check src/
-      - run: uv run mypy src/
+      # --no-sync: reuse the dev environment installed above. Without it, `uv run` re-syncs to
+      # the default (no-extras) state and removes ruff/mypy, since `dev` is an optional-extra.
+      - run: uv run --no-sync ruff check src/
+      - run: uv run --no-sync ruff format --check src/
+      - run: uv run --no-sync mypy src/
 
   python-test:
     name: Python tests (py${{ matrix.python-version }})
@@ -39,7 +41,8 @@ jobs:
         with:
           enable-cache: true
       - run: uv sync --extra dev --python ${{ matrix.python-version }}
-      - run: uv run pytest tests/unit tests/integration tests/e2e -q
+      # --no-sync: reuse the dev environment installed above (pytest lives in the dev extra).
+      - run: uv run --no-sync pytest tests/unit tests/integration tests/e2e -q
 
   frontend:
     name: Frontend (lint + typecheck + build)
