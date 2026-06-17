@@ -35,6 +35,10 @@ dependencies = [
     "tree-sitter-cpp>=0.21.0",
     "tree-sitter-java>=0.21.0",
     "sentence-transformers>=3.0.0",
+    # Pin <5: the jina-v2-base-code trust_remote_code module imports
+    # find_pruneable_heads_and_indices from transformers.pytorch_utils, which was removed in
+    # transformers 5.0. sentence-transformers allows 4.41+, so this stays compatible.
+    "transformers>=4.41,<5",
     "torch>=2.3.0",
     "lancedb>=0.10.0",
     "rank-bm25>=0.2.2",
