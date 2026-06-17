@@ -51,7 +51,11 @@ export async function streamSSE(url: string, options: StreamOptions): Promise<vo
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
-    buffer += decoder.decode(value, { stream: true });
+    // Normalise CRLF: sse-starlette ends frames with \r\n\r\n, but the frame/line splitting
+    // below keys off \n, and "\r\n\r\n" contains no "\n\n" substring — so without this the
+    // boundary is never found and no frame is ever dispatched. Stripping \r is safe: raw CR
+    // bytes only appear as SSE line endings, never inside the JSON data payload.
+    buffer += decoder.decode(value, { stream: true }).replace(/\r/g, "");
     let boundary = buffer.indexOf("\n\n");
     while (boundary >= 0) {
       const frame = parseFrame(buffer.slice(0, boundary));
