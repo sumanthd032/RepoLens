@@ -113,7 +113,7 @@ class ParsedChunk:
 
 
 @cache
-def _load_language(language: str) -> Language | None:
+def load_language(language: str) -> Language | None:
     """Import and cache the tree-sitter grammar for ``language`` (``None`` if unavailable)."""
     spec = _GRAMMAR_MODULES.get(language)
     if spec is None:
@@ -136,7 +136,7 @@ class TreeSitterParser:
         Falls back to a single whole-file chunk when the language is unsupported or no
         definition nodes are found.
         """
-        ts_language = _load_language(language)
+        ts_language = load_language(language)
         if ts_language is None:
             return [self._whole_file_chunk(file_path, content, language)]
 
