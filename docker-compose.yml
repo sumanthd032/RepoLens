@@ -1,0 +1,20 @@
+# RepoLens docker-compose — skeleton (completed in Step 10).
+# Single service, single port. Mounts ~/.repolens for index persistence across restarts.
+
+services:
+  repolens:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: repolens:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persist all indexes (vectors, BM25, symbol graph, metadata) on the host.
+      - ${HOME}/.repolens:/root/.repolens
+    environment:
+      - REPOLENS_DATA_DIR=/root/.repolens
+      - REPOLENS_LOG_LEVEL=INFO
+      # Provide your key via an .env file or the host environment.
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    restart: unless-stopped

@@ -1,0 +1,45 @@
+site_name: RepoLens
+site_description: A local-first RAG engine that answers questions about any repository, grounded in the real code.
+site_url: https://repolens.github.io/repolens/
+repo_url: https://github.com/repolens/repolens
+repo_name: repolens/repolens
+copyright: Copyright &copy; 2026 RepoLens contributors
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: deep purple
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+    - scheme: default
+      primary: deep purple
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - search.suggest
+  icon:
+    logo: material/telescope
+
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - tables
+  - toc:
+      permalink: true
+
+plugins:
+  - search

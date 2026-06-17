@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Backgrounds */
+  --bg-void: #070b0f; /* True space — page background */
+  --bg-base: #0d1117; /* Primary surface */
+  --bg-elevated: #161b22; /* Cards, panels */
+  --bg-muted: #1c2128; /* Input backgrounds, subtle surfaces */
+  --bg-glass: rgba(22, 27, 34, 0.7); /* Glass morphism panels */
+
+  /* Borders */
+  --border-subtle: #21262d; /* Separators */
+  --border-default: #30363d; /* Card borders, input borders */
+  --border-strong: #3d444d; /* Hover states */
+
+  /* Text */
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  --text-inverse: #0d1117; /* Text on light/gradient backgrounds */
+
+  /* Accent — the Observatory signature */
+  --accent-purple: #8b5cf6;
+  --accent-blue: #3b82f6;
+  --accent-grad: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+
+  /* Semantic */
+  --color-success: #3fb950;
+  --color-warning: #d29922;
+  --color-danger: #f85149;
+  --color-info: #58a6ff;
+
+  /* Language colours — used in CitationCard and file tree */
+  --lang-py: #60a5fa; /* Python blue */
+  --lang-ts: #34d399; /* TypeScript teal */
+  --lang-go: #67e8f9; /* Go cyan */
+  --lang-rs: #fb923c; /* Rust orange */
+  --lang-js: #fbbf24; /* JavaScript amber */
+  --lang-c: #a78bfa; /* C/C++ purple */
+  --lang-java: #f472b6; /* Java pink */
+  --lang-md: #94a3b8; /* Markdown grey */
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Inter", system-ui, sans-serif;
+    color: var(--text-primary);
+    /* The "observatory dome" — a faint purple glow at the top of the screen. */
+    background: radial-gradient(
+      ellipse 80% 60% at 50% -10%,
+      #12082a 0%,
+      #070b0f 60%
+    );
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  code,
+  pre {
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+  }
+}
+
+@layer components {
+  /* Glass morphism — only for elements that float above the content layer. */
+  .glass {
+    background: rgba(22, 27, 34, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(48, 54, 61, 0.6);
+  }
+}
+
+/* Respect reduced-motion preferences — disable animations when requested. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

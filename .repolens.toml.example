@@ -1,0 +1,43 @@
+# RepoLens project configuration.
+# Copy this file to `.repolens.toml` (project root) or `~/.repolens/config.toml` (global).
+# Environment variables and `.env` override any value set here.
+
+[index]
+# Languages parsed by tree-sitter. Files in other languages are skipped silently.
+languages = ["python", "go", "javascript", "typescript", "rust", "c", "cpp", "java"]
+# Code-aware embedding model (loaded locally via sentence-transformers).
+embedding_model = "jinaai/jina-embeddings-v2-base-code"
+# Maximum tokens per chunk before the semantic chunker sub-splits with a sliding window.
+max_chunk_tokens = 512
+# Token overlap between sub-chunks of a large function/class.
+chunk_overlap_tokens = 64
+# Gitignore-style patterns file applied before any file is parsed.
+ignore_file = ".repolensignore"
+
+[retrieval]
+# Candidates pulled from the dense (vector) index per query.
+top_k_dense = 20
+# Candidates pulled from the BM25 keyword index per query.
+top_k_bm25 = 20
+# Candidates kept after cross-encoder reranking.
+top_k_rerank = 8
+# Hops of caller/callee graph expansion around each reranked chunk.
+graph_expansion_hops = 1
+
+[generation]
+# LLM backend: anthropic | openai | ollama
+llm_backend = "anthropic"
+# Model identifier passed to the selected backend.
+llm_model = "claude-sonnet-4-5"
+# Maximum tokens in a generated answer.
+max_answer_tokens = 2048
+# Times to regenerate when citation validation fails.
+max_retries = 2
+# Minimum grounding score (0.0–1.0) required to accept an answer.
+grounding_threshold = 0.5
+
+[drift]
+# When true, `repolens drift --ci` exits non-zero if contradictions are found.
+ci_mode = false
+# Minimum severity reported: low | medium | high
+severity_threshold = "low"

@@ -1,0 +1,42 @@
+# RepoLens ignore file — gitignore-style patterns applied before any file is parsed.
+# Vendored, generated, and build-output files add noise without contributing real source.
+
+# Dependencies / vendored code
+vendor/
+node_modules/
+third_party/
+.venv/
+venv/
+
+# Build & distribution output
+dist/
+build/
+target/
+out/
+*.egg-info/
+
+# Generated code
+*.pb.go
+*.pb.cc
+*.pb.h
+*_pb2.py
+*_pb2_grpc.py
+*.generated.*
+*.gen.go
+
+# Minified / bundled assets
+*.min.js
+*.min.css
+*.map
+
+# Lockfiles & caches
+*.lock
+__pycache__/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Version control & IDE
+.git/
+.idea/
+.vscode/
