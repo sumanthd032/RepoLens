@@ -32,7 +32,7 @@ from the code.
 ## Quick install
 
 ```bash
-pip install repolens
+pip install repolens-rag
 export GROQ_API_KEY=gsk_...         # free key: https://console.groq.com/keys
 ```
 

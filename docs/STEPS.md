@@ -25,7 +25,7 @@ After completing each step, write a detailed completion report (see CLAUDE.md fo
 - `LICENSE` — MIT
 - `CHANGELOG.md` — skeleton (## [Unreleased])
 - `CONTRIBUTING.md` — dev setup, PR guide, commit convention
-- `README.md` — project name, one-liner, badges placeholder, quick install (`pip install repolens`)
+- `README.md` — project name, one-liner, badges placeholder, quick install (`pip install repolens-rag`)
 - `docker-compose.yml` — skeleton (will be completed in Step 10)
 - `Dockerfile` — skeleton (will be completed in Step 10)
 - `mkdocs.yml` — Material theme config

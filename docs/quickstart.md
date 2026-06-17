@@ -7,7 +7,7 @@ Get RepoLens indexing a repository and answering grounded questions in a few min
 RepoLens needs Python 3.11+.
 
 ```bash
-pip install repolens
+pip install repolens-rag
 ```
 
 Or run it fully containerised (no Python setup needed):
