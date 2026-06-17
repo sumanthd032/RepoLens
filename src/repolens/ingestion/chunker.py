@@ -14,6 +14,7 @@ the model's real tokenizer if exact counts are ever needed.
 
 from __future__ import annotations
 
+import hashlib
 import re
 import uuid
 from collections.abc import Callable
@@ -26,6 +27,18 @@ if TYPE_CHECKING:
     from repolens.ingestion.parser import ParsedChunk
 
 logger = get_logger("ingestion.chunker")
+
+# Fixed namespace for deriving stable chunk ids, so re-indexing unchanged content yields the
+# same id and the vector store upsert (keyed on chunk_id) updates in place instead of
+# duplicating rows.
+_CHUNK_NAMESPACE = uuid.UUID("5f3c9a1e-2b6d-4e8a-9c47-7a1d0b2f6e30")
+
+
+def make_chunk_id(file_path: str, symbol_name: str, part: int, body: str) -> str:
+    """Deterministically derive a chunk id from its location and content."""
+    body_hash = hashlib.sha256(body.encode("utf-8")).hexdigest()
+    key = f"{file_path}|{symbol_name}|{part}|{body_hash}"
+    return str(uuid.uuid5(_CHUNK_NAMESPACE, key))
 
 # Splits code into word, number, and single-punctuation tokens — a stable proxy for the
 # subword count without loading a model tokenizer.
@@ -193,5 +206,6 @@ class SemanticChunker:
             token_count=self._count(body),
             part=part,
             part_total=part_total,
+            chunk_id=make_chunk_id(parsed.file_path, parsed.symbol_name, part, body),
         )
         return IndexChunk(**base)
