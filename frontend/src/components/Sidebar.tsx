@@ -2,13 +2,7 @@
 // reveals that repo's Chat and Drift Report sub-navigation.
 
 import { NavLink, useMatch } from "react-router-dom";
-import {
-  BookOpen,
-  GitCompare,
-  MessageSquare,
-  Settings,
-  Telescope,
-} from "lucide-react";
+import { BookOpen, GitCompare, MessageSquare, Telescope } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { useRepos } from "../hooks/useRepos";
@@ -89,13 +83,6 @@ export function Sidebar() {
           </div>
         )}
       </nav>
-
-      <div className="border-t border-border-subtle px-3 py-3">
-        <div className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-text-muted">
-          <Settings size={18} strokeWidth={1.5} />
-          <span>Settings</span>
-        </div>
-      </div>
     </aside>
   );
 }
