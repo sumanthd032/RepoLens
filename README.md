@@ -5,7 +5,7 @@
 **Ask any repository how it actually works — and get answers grounded in the real code.**
 
 [![CI](https://img.shields.io/github/actions/workflow/status/sumanthd032/repolens/ci.yml?branch=main&label=CI)](https://github.com/sumanthd032/repolens/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/repolens)](https://pypi.org/project/repolens-rag/)
+[![PyPI](https://img.shields.io/pypi/v/repolens-rag)](https://pypi.org/project/repolens-rag/)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
