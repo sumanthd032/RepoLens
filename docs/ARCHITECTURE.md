@@ -10,6 +10,56 @@ RepoLens has three distinct operational modes sharing the same storage layer:
 | **Ask** | `repolens ask "..."` or UI chat | retrieve → generate → verify → stream |
 | **Drift** | `repolens drift` or UI "Run Drift Check" | compare docs vs code → entailment → report |
 
+```mermaid
+flowchart TB
+    Browser["🖥️ Browser — React SPA<br/>RepoManager · Chat · DriftReport"]
+    Browser <-->|"HTTP requests / SSE stream"| Server
+
+    subgraph App["FastAPI server (server.py) · single process · localhost:8000"]
+        Server["API routers + AppState<br/>(config, storage handles, local models loaded once)"]
+
+        subgraph Ingest["Ingestion — index time"]
+            direction LR
+            ING["walker → parser → chunker →<br/>graph → embedder + BM25"]
+        end
+
+        subgraph Retrieve["Retrieval — query time"]
+            direction LR
+            RET["hybrid (dense + BM25) → RRF →<br/>reranker → graph expander"]
+        end
+
+        subgraph Gen["Generation + Verification"]
+            direction LR
+            GEN["grounded prompt → LLM →<br/>citation validator → grounding scorer"]
+        end
+
+        subgraph Drift["Drift detector — drift mode"]
+            direction LR
+            DRF["claim extractor → NLI entailment →<br/>markdown / JSON report"]
+        end
+    end
+
+    subgraph Storage["💾 Local storage — ~/.repolens/&lt;repo_id&gt;/"]
+        direction LR
+        Lance[("LanceDB<br/>vectors")]
+        BM[("BM25 index<br/>pickle")]
+        SQLite[("SQLite<br/>metadata + graph")]
+    end
+
+    Server --> Ingest
+    Server --> Retrieve
+    Server --> Gen
+    Server --> Drift
+
+    Ingest -->|"writes"| Storage
+    Retrieve -->|"reads"| Storage
+    Drift -->|"reads"| Storage
+    Retrieve --> Gen
+```
+
+> Both the web endpoints and the CLI construct the same `AppState` (`src/repolens/api/engine.py`)
+> and call the same orchestration functions — so the CLI and server behave identically.
+
 ---
 
 ## Layer 1 — Web Interface
@@ -182,6 +232,20 @@ After the LLM produces an answer:
 
 ## Drift Detection Mode
 
+```mermaid
+flowchart LR
+    D(["repolens drift --repo &lt;id&gt; [--ci]"]) --> Ext["extractor.py<br/>LLM extracts DocClaims<br/>from README / docs / docstrings"]
+    Ext -->|"per claim"| Ret["hybrid retriever<br/>find matching code"]
+    Ret --> NLI{"checker.py<br/>three-way NLI"}
+    NLI -->|"entails"| Sup["supported"]
+    NLI -->|"contradicts"| Con["contradicted"]
+    NLI -->|"neutral / no code"| NF["not_found"]
+    Sup --> Rep["reporter.py<br/>markdown + JSON report"]
+    Con --> Rep
+    NF --> Rep
+    Rep -->|"--ci & any contradicted"| Exit["exit code 1"]
+```
+
 ### extractor.py — Claim extractor
 - Indexes the repo's documentation separately: README.md, `/docs/**/*.md`, all docstrings and
   inline code comments
@@ -213,49 +277,43 @@ For each extracted claim:
 ## Data Flow Diagrams
 
 ### Index time
-```
-repolens index ./myrepo
-    │
-    ▼
-walker.py ──(files)──► parser.py ──(ParsedChunk)──► chunker.py ──(IndexChunk)──►
-    │                                                                              │
-    │                                                                              ▼
-    │                                                                       embedder.py ──► LanceDB
-    │                                                                              │
-    │                                                                       bm25.py ──────► BM25 index
-    │                                                                              │
-    └──────────────────────────────────────────────────► graph.py ──► SQLite graph
-                                                                                   │
-                                                                             metadata.py ──► SQLite repos/files
+
+```mermaid
+flowchart LR
+    Start(["repolens index ./myrepo"]) --> Walker["walker.py<br/>git walk + .repolensignore"]
+    Walker -->|"(file, lang, content)"| Parser["parser.py<br/>tree-sitter AST"]
+    Parser -->|"ParsedChunk"| Chunker["chunker.py<br/>semantic + safe sub-chunking"]
+    Chunker -->|"IndexChunk"| Embedder["embedder.py<br/>jina-v2-code (cached)"]
+    Chunker -->|"IndexChunk"| BM25["bm25.py<br/>CamelCase tokenizer"]
+    Parser -->|"call / import edges"| Graph["graph.py<br/>NetworkX DiGraph"]
+
+    Embedder --> Lance[("LanceDB<br/>vectors")]
+    BM25 --> BMI[("BM25 index")]
+    Graph --> SG[("SQLite graph")]
+    Walker -.->|"commit SHA, chunk count"| Meta[("SQLite repos/files")]
 ```
 
 ### Query time
-```
-User question
-    │
-    ▼
-HyDE expansion (hypothetical code snippet)
-    │
-    ▼
-hybrid.py ──(dense query + BM25 query, parallel)──► RRF fusion ──► top-20 candidates
-    │
-    ▼
-reranker.py ──► top-8 candidates
-    │
-    ▼
-expander.py ──(graph lookup)──► expanded context (≤12 chunks)
-    │
-    ▼
-prompt.py ──(grounded system prompt + chunks)──► LLM
-    │
-    ▼
-validator.py ──(re-open files, check citations)──► accept | reject | not_found
-    │
-    ▼
-scorer.py ──(NLI per sentence)──► grounding score
-    │
-    ▼
-SSE stream ──► browser
+
+```mermaid
+flowchart TB
+    Q(["User question"]) --> HyDE["HyDE expansion<br/>hypothetical code snippet"]
+
+    HyDE --> Dense["dense retrieval<br/>LanceDB ANN · top-20"]
+    HyDE --> Bm["BM25 retrieval<br/>top-20"]
+    Dense --> RRF["hybrid.py — RRF fusion<br/>top-20 candidates"]
+    Bm --> RRF
+    RRF --> Rerank["reranker.py<br/>cross-encoder · top-8"]
+    Rerank --> Expand["expander.py<br/>graph 1-hop · ≤12 chunks"]
+
+    Expand -->|"no relevant chunks"| NF["error: not_found<br/>(LLM never called)"]
+    Expand -->|"chunks found"| Prompt["prompt.py<br/>grounded system prompt"]
+    Prompt --> LLM["LLM<br/>llm.complete()"]
+    LLM --> Validate{"validator.py<br/>re-open files,<br/>check citations"}
+    Validate -->|"invalid · retry ≤2"| Prompt
+    Validate -->|"valid"| Scorer["scorer.py<br/>NLI grounding score"]
+    Scorer --> SSE(["SSE stream → browser"])
+    NF --> SSE
 ```
 
 ---
